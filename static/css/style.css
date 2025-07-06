@@ -1,0 +1,54 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 40px;
+  background-color: #f5f5f5;
+}
+
+.plan {
+  border: 1px solid #ddd;
+  padding: 20px;
+  margin: 20px 0;
+  background: white;
+  border-radius: 8px;
+}
+
+button {
+  background: #007cba;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+button:hover {
+  background: #005a87;
+}
+
+input {
+  padding: 10px;
+  margin: 10px 0;
+  width: 300px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  display: block;
+}
+
+#subscriptionForm {
+  margin-top: 30px;
+  padding: 20px;
+  border: 2px solid #007cba;
+  background: white;
+  border-radius: 8px;
+}
+
+.form-section {
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.form-section h4 {
+  margin-bottom: 15px;
+  color: #333;
+}
