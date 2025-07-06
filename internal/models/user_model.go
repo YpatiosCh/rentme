@@ -25,8 +25,9 @@ type User struct {
 	// Address Information (required for product location context)
 	Address    string   `gorm:"type:varchar(255);not null"`
 	City       string   `gorm:"type:varchar(100);not null"`
-	Region     string   `gorm:"type:varchar(100);not null"` // Prefecture/Region in Greece
+	Region     string   `gorm:"type:varchar(100);not null"` // Περιοχή
 	PostalCode string   `gorm:"type:varchar(10);not null"`
+	Prefecture string   `gorm:"type:varchar(100);not null"` // Νομός
 	Country    string   `gorm:"type:varchar(50);not null;default:'Greece'"`
 	Latitude   *float64 `gorm:"type:decimal(10,8)"` // For map functionality
 	Longitude  *float64 `gorm:"type:decimal(11,8)"` // For map functionality

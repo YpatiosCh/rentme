@@ -4,7 +4,6 @@ import (
 	"github.com/YpatiosCh/rentme/internal/err"
 	"github.com/YpatiosCh/rentme/internal/models"
 	"github.com/google/uuid"
-	"github.com/stripe/stripe-go/v76"
 )
 
 type Services interface {
@@ -22,11 +21,6 @@ type UserService interface {
 }
 
 type SubscriptionService interface {
-	GetCustomerSubscriptions(customerID string) ([]*stripe.Subscription, error)
-	CancelSubscription(userID string) error
-	UpdateSubscriptionPlan(userID, newPlanID string) error
-	CreateCheckoutSessionWithUserData(userEmail, planID, successURL, cancelURL string, metadata map[string]string) (string, error)
-	HandleSuccessfulPaymentFromSession(sessionID string) (*models.User, error)
 }
 
 type AuthService interface {

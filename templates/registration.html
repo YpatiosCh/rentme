@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="el">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{.Title}}</title>
+    <link rel="stylesheet" href="/static/css/registration.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="registration-header">
+        <h1>Ξεκινήστε να βγάζετε χρήματα από τα προϊόντα σας!</h1>
+        <p>
+          Συμπληρώστε τα στοιχεία σας για να δημιουργήσετε τον λογαριασμό σας
+        </p>
+      </div>
+
+      <!-- Progress Indicator -->
+      <div class="progress-container">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="progress-steps">
+          <div class="step active" data-step="1">
+            <span class="step-number">1</span>
+            <span class="step-label">Πλάνο</span>
+          </div>
+          <div class="step" data-step="2">
+            <span class="step-number">2</span>
+            <span class="step-label">Στοιχεία</span>
+          </div>
+          <div class="step" data-step="3">
+            <span class="step-number">3</span>
+            <span class="step-label">Εταιρεία</span>
+          </div>
+          <div class="step" data-step="4">
+            <span class="step-number">4</span>
+            <span class="step-label">Τοποθεσία</span>
+          </div>
+          <div class="step" data-step="5">
+            <span class="step-number">5</span>
+            <span class="step-label">Κωδικός</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Registration Form -->
+      <form id="registrationForm" class="registration-form">
+        <!-- Step 1: Plan Selection -->
+        <div class="form-step active" id="step1">
+          <h2>Επιλέξτε το πλάνο σας</h2>
+          <div class="plans-grid">
+            {{range $key, $plan := .Plans}}
+            <div class="plan-card" data-plan="{{$key}}">
+              <div class="plan-header">
+                <h3>{{$plan.Name}}</h3>
+                {{if eq $key "professional"}}<span class="popular-badge"
+                  >Δημοφιλές</span
+                >{{end}}
+              </div>
+              <div class="plan-price">€{{printf "%.2f" $plan.Price}}/μήνα</div>
+              <ul class="plan-features">
+                {{range $plan.Features}}
+                <li>{{.}}</li>
+                {{end}}
+              </ul>
+              <button
+                type="button"
+                class="plan-select-btn"
+                data-plan="{{$key}}"
+              >
+                Επιλογή {{$plan.Name}}
+              </button>
+            </div>
+            {{end}}
+          </div>
+          <input type="hidden" name="plan_id" id="selectedPlan" required />
+        </div>
+
+        <!-- Step 2: Personal Information -->
+        <div class="form-step" id="step2">
+          <h2>Προσωπικά Στοιχεία</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="firstName">Όνομα *</label>
+              <input type="text" id="firstName" name="first_name" required />
+            </div>
+            <div class="form-group">
+              <label for="lastName">Επίθετο *</label>
+              <input type="text" id="lastName" name="last_name" required />
+            </div>
+            <div class="form-group">
+              <label for="email">Email *</label>
+              <input type="email" id="email" name="email" required />
+            </div>
+            <div class="form-group">
+              <label for="phone">Τηλέφωνο *</label>
+              <input type="tel" id="phone" name="phone" required />
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3: Business Information -->
+        <div class="form-step" id="step3">
+          <h2>Στοιχεία Εταιρείας (Προαιρετικό)</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="businessName">Όνομα Εταιρείας</label>
+              <input type="text" id="businessName" name="business_name" />
+            </div>
+            <div
+              class="form-group"
+              id="businessDescriptionGroup"
+              style="display: none"
+            >
+              <label for="businessDescription">Περιγραφή Εταιρείας</label>
+              <textarea
+                id="businessDescription"
+                name="business_description"
+                rows="3"
+              ></textarea>
+            </div>
+            <div class="form-group">
+              <label for="website">Ιστοσελίδα</label>
+              <input
+                type="url"
+                id="website"
+                name="website"
+                placeholder="https://example.com"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4: Location Information -->
+        <div class="form-step" id="step4">
+          <h2>Τοποθεσία</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="address">Οδός</label>
+              <input type="text" id="address" name="address" />
+            </div>
+            <div class="form-group">
+              <label for="city">Πόλη *</label>
+              <input type="text" id="city" name="city" required />
+            </div>
+            <div class="form-group">
+              <label for="region">Περιοχή *</label>
+              <input type="text" id="region" name="region" required />
+            </div>
+            <div class="form-group">
+              <label for="prefecture">Νομός *</label>
+              <input type="text" id="prefecture" name="prefecture" required />
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 5: Password Setup -->
+        <div class="form-step" id="step5">
+          <h2>Δημιουργία Κωδικού</h2>
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="password">Κωδικός *</label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                required
+                minlength="8"
+              />
+              <small>Τουλάχιστον 8 χαρακτήρες</small>
+            </div>
+            <div class="form-group">
+              <label for="confirmPassword">Επιβεβαίωση Κωδικού *</label>
+              <input
+                type="password"
+                id="confirmPassword"
+                name="confirm_password"
+                required
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="form-navigation">
+          <button
+            type="button"
+            id="prevBtn"
+            class="btn btn-secondary"
+            style="display: none"
+          >
+            Προηγούμενο
+          </button>
+          <button type="button" id="nextBtn" class="btn btn-primary">
+            Επόμενο
+          </button>
+          <button
+            type="submit"
+            id="submitBtn"
+            class="btn btn-success"
+            style="display: none"
+          >
+            Συνέχεια στην Πληρωμή
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <script src="/static/js/registration.js"></script>
+  </body>
+</html>
