@@ -5,206 +5,329 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{{.Title}}</title>
     <link rel="stylesheet" href="/static/css/registration.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
     <div class="container">
-      <div class="registration-header">
-        <h1>Ξεκινήστε να βγάζετε χρήματα από τα προϊόντα σας!</h1>
-        <p>
-          Συμπληρώστε τα στοιχεία σας για να δημιουργήσετε τον λογαριασμό σας
-        </p>
-      </div>
-
-      <!-- Progress Indicator -->
-      <div class="progress-container">
-        <div class="progress-bar">
-          <div class="progress-fill" id="progressFill"></div>
+      <div class="registration-card">
+        <!-- Header -->
+        <div class="header">
+          <h1>Δημιούργησε τον λογαριασμό σου</h1>
+          <p>Μόνο 2 απλά βήματα για να ξεκινήσεις</p>
         </div>
-        <div class="progress-steps">
-          <div class="step active" data-step="1">
-            <span class="step-number">1</span>
-            <span class="step-label">Πλάνο</span>
+
+        <!-- Progress Indicator -->
+        <div class="progress-wrapper">
+          <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
           </div>
-          <div class="step" data-step="2">
-            <span class="step-number">2</span>
-            <span class="step-label">Στοιχεία</span>
-          </div>
-          <div class="step" data-step="3">
-            <span class="step-number">3</span>
-            <span class="step-label">Εταιρεία</span>
-          </div>
-          <div class="step" data-step="4">
-            <span class="step-number">4</span>
-            <span class="step-label">Τοποθεσία</span>
-          </div>
-          <div class="step" data-step="5">
-            <span class="step-number">5</span>
-            <span class="step-label">Κωδικός</span>
+          <div class="step-indicators">
+            <div class="step-dot active" data-step="1">1</div>
+            <div class="step-dot" data-step="2">2</div>
           </div>
         </div>
-      </div>
 
-      <!-- Registration Form -->
-      <form id="registrationForm" class="registration-form">
-        <!-- Step 1: Plan Selection -->
-        <div class="form-step active" id="step1">
-          <h2>Επιλέξτε το πλάνο σας</h2>
-          <div class="plans-grid">
-            {{range $key, $plan := .Plans}}
-            <div class="plan-card" data-plan="{{$key}}">
-              <div class="plan-header">
-                <h3>{{$plan.Name}}</h3>
-                {{if eq $key "professional"}}<span class="popular-badge"
-                  >Δημοφιλές</span
-                >{{end}}
+        <!-- Registration Form -->
+        <form id="registrationForm" class="registration-form" novalidate>
+          <!-- Step 1: Account Creation -->
+          <div class="form-step active" id="step1">
+            <div class="step-content">
+              <h2>Στοιχεία λογαριασμού</h2>
+
+              <!-- Account Fields -->
+              <div class="form-fields">
+                <div class="field-group">
+                  <label for="email">Email</label>
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    autocomplete="email"
+                    required
+                  />
+                  <div class="error-message" id="emailError"></div>
+                </div>
+
+                <div class="field-group">
+                  <label for="password">Κωδικός</label>
+                  <div class="password-field">
+                    <input
+                      type="password"
+                      id="password"
+                      name="password"
+                      autocomplete="new-password"
+                      required
+                      minlength="8"
+                    />
+                    <button
+                      type="button"
+                      class="password-toggle"
+                      onclick="togglePassword('password')"
+                    >
+                      👁️
+                    </button>
+                  </div>
+                  <div class="error-message" id="passwordError"></div>
+                  <small>Τουλάχιστον 8 χαρακτήρες</small>
+                </div>
+
+                <div class="field-group">
+                  <label for="confirmPassword">Επιβεβαίωση κωδικού</label>
+                  <div class="password-field">
+                    <input
+                      type="password"
+                      id="confirmPassword"
+                      name="confirm_password"
+                      autocomplete="new-password"
+                      required
+                    />
+                    <button
+                      type="button"
+                      class="password-toggle"
+                      onclick="togglePassword('confirmPassword')"
+                    >
+                      👁️
+                    </button>
+                  </div>
+                  <div class="error-message" id="confirmPasswordError"></div>
+                </div>
               </div>
-              <div class="plan-price">€{{printf "%.2f" $plan.Price}}/μήνα</div>
-              <ul class="plan-features">
-                {{range $plan.Features}}
-                <li>{{.}}</li>
-                {{end}}
-              </ul>
-              <button
-                type="button"
-                class="plan-select-btn"
-                data-plan="{{$key}}"
-              >
-                Επιλογή {{$plan.Name}}
-              </button>
-            </div>
-            {{end}}
-          </div>
-          <input type="hidden" name="plan_id" id="selectedPlan" required />
-        </div>
 
-        <!-- Step 2: Personal Information -->
-        <div class="form-step" id="step2">
-          <h2>Προσωπικά Στοιχεία</h2>
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="firstName">Όνομα *</label>
-              <input type="text" id="firstName" name="first_name" required />
-            </div>
-            <div class="form-group">
-              <label for="lastName">Επίθετο *</label>
-              <input type="text" id="lastName" name="last_name" required />
-            </div>
-            <div class="form-group">
-              <label for="email">Email *</label>
-              <input type="email" id="email" name="email" required />
-            </div>
-            <div class="form-group">
-              <label for="phone">Τηλέφωνο *</label>
-              <input type="tel" id="phone" name="phone" required />
+              <!-- Terms Section -->
+              <div class="terms-section">
+                <div class="terms-checkbox">
+                  <input type="checkbox" id="termsAccepted" required />
+                  <label for="termsAccepted">
+                    Αποδέχομαι τους
+                    <button
+                      type="button"
+                      class="terms-link"
+                      onclick="openTermsModal()"
+                    >
+                      Όρους Χρήσης
+                    </button>
+                    και την
+                    <button
+                      type="button"
+                      class="terms-link"
+                      onclick="openPrivacyModal()"
+                    >
+                      Πολιτική Απορρήτου
+                    </button>
+                  </label>
+                </div>
+                <div class="error-message" id="termsError"></div>
+              </div>
+
+              <!-- Login Link -->
+              <div class="login-link">
+                <p>Έχεις ήδη λογαριασμό; <a href="/login">Συνδέσου εδώ</a></p>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Step 3: Business Information -->
-        <div class="form-step" id="step3">
-          <h2>Στοιχεία Εταιρείας (Προαιρετικό)</h2>
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="businessName">Όνομα Εταιρείας</label>
-              <input type="text" id="businessName" name="business_name" />
-            </div>
-            <div
-              class="form-group"
-              id="businessDescriptionGroup"
-              style="display: none"
-            >
-              <label for="businessDescription">Περιγραφή Εταιρείας</label>
-              <textarea
-                id="businessDescription"
-                name="business_description"
-                rows="3"
-              ></textarea>
-            </div>
-            <div class="form-group">
-              <label for="website">Ιστοσελίδα</label>
-              <input
-                type="url"
-                id="website"
-                name="website"
-                placeholder="https://example.com"
-              />
+          <!-- Step 2: Plan Selection -->
+          <div class="form-step" id="step2">
+            <div class="step-content">
+              <h2>Επιλέξτε το πλάνο σας</h2>
+
+              <!-- Plans -->
+              <div class="plans-container">
+                <!-- Basic Plan -->
+                <div class="plan-option" data-plan="basic">
+                  <input
+                    type="radio"
+                    name="plan_selection"
+                    value="basic"
+                    id="plan-basic"
+                    hidden
+                  />
+                  <label for="plan-basic" class="plan-label">
+                    <div class="plan-header">
+                      <h3>Basic Plan</h3>
+                    </div>
+                    <div class="plan-price">€10<span>/μήνα</span></div>
+                    <div class="plan-features">
+                      <div class="feature">5 Ενεργά προϊόντα</div>
+                      <div class="feature">5 Φωτογραφίες/προϊόν</div>
+                      <div class="feature">Βασικό συμβόλαιο</div>
+                      <div class="feature">Βασικά analytics</div>
+                    </div>
+                  </label>
+                </div>
+
+                <!-- Professional Plan (Δημοφιλές) -->
+                <div class="plan-option" data-plan="professional">
+                  <input
+                    type="radio"
+                    name="plan_selection"
+                    value="professional"
+                    id="plan-professional"
+                    hidden
+                  />
+                  <label for="plan-professional" class="plan-label">
+                    <div class="plan-header">
+                      <h3>Professional Plan</h3>
+                      <span class="popular">Δημοφιλές</span>
+                    </div>
+                    <div class="plan-price">€20<span>/μήνα</span></div>
+                    <div class="plan-features">
+                      <div class="feature">15 Ενεργά προϊόντα</div>
+                      <div class="feature">10 Φωτογραφίες/προϊόν</div>
+                      <div class="feature">Προσαρμόσιμο συμβόλαιο</div>
+                      <div class="feature">Προηγμένα analytics</div>
+                      <div class="feature">2 Featured listings/μήνα</div>
+                      <div class="feature">Bulk upload</div>
+                    </div>
+                  </label>
+                </div>
+
+                <!-- Business Plan -->
+                <div class="plan-option" data-plan="business">
+                  <input
+                    type="radio"
+                    name="plan_selection"
+                    value="business"
+                    id="plan-business"
+                    hidden
+                  />
+                  <label for="plan-business" class="plan-label">
+                    <div class="plan-header">
+                      <h3>Business Plan</h3>
+                    </div>
+                    <div class="plan-price">€40<span>/μήνα</span></div>
+                    <div class="plan-features">
+                      <div class="feature">Απεριόριστα προϊόντα</div>
+                      <div class="feature">Απεριόριστες φωτογραφίες</div>
+                      <div class="feature">Πλήρως custom συμβόλαιο</div>
+                      <div class="feature">Πλήρη analytics + export</div>
+                      <div class="feature">10 Featured listings/μήνα</div>
+                      <div class="feature">Bulk upload</div>
+                      <div class="feature">Custom contact page</div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <input type="hidden" name="plan_id" id="selectedPlan" required />
+              <div class="error-message" id="planError"></div>
+
+              <!-- Payment Summary -->
+              <div class="payment-summary">
+                <h3>Περίληψη παραγγελίας</h3>
+                <div class="summary-item">
+                  <span id="selectedPlanName">Επιλέξτε πλάνο</span>
+                  <span id="selectedPlanPrice">€0/μήνα</span>
+                </div>
+                <div class="summary-total">
+                  <span>Σύνολο</span>
+                  <span id="totalPrice">€0/μήνα</span>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
 
-        <!-- Step 4: Location Information -->
-        <div class="form-step" id="step4">
-          <h2>Τοποθεσία</h2>
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="address">Οδός</label>
-              <input type="text" id="address" name="address" />
-            </div>
-            <div class="form-group">
-              <label for="city">Πόλη *</label>
-              <input type="text" id="city" name="city" required />
-            </div>
-            <div class="form-group">
-              <label for="region">Περιοχή *</label>
-              <input type="text" id="region" name="region" required />
-            </div>
-            <div class="form-group">
-              <label for="prefecture">Νομός *</label>
-              <input type="text" id="prefecture" name="prefecture" required />
-            </div>
+          <!-- Navigation -->
+          <div class="form-navigation">
+            <button type="button" id="prevBtn" class="btn btn-secondary hidden">
+              Προηγούμενο
+            </button>
+            <button type="button" id="nextBtn" class="btn btn-primary">
+              Επόμενο
+            </button>
+            <button type="submit" id="submitBtn" class="btn btn-success hidden">
+              Πληρωμή τώρα
+            </button>
           </div>
-        </div>
+        </form>
+      </div>
+    </div>
 
-        <!-- Step 5: Password Setup -->
-        <div class="form-step" id="step5">
-          <h2>Δημιουργία Κωδικού</h2>
-          <div class="form-grid">
-            <div class="form-group">
-              <label for="password">Κωδικός *</label>
-              <input
-                type="password"
-                id="password"
-                name="password"
-                required
-                minlength="8"
-              />
-              <small>Τουλάχιστον 8 χαρακτήρες</small>
-            </div>
-            <div class="form-group">
-              <label for="confirmPassword">Επιβεβαίωση Κωδικού *</label>
-              <input
-                type="password"
-                id="confirmPassword"
-                name="confirm_password"
-                required
-              />
-            </div>
-          </div>
-        </div>
-
-        <!-- Navigation Buttons -->
-        <div class="form-navigation">
-          <button
-            type="button"
-            id="prevBtn"
-            class="btn btn-secondary"
-            style="display: none"
-          >
-            Προηγούμενο
+    <!-- Terms Modal -->
+    <div id="termsModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Όροι Χρήσης</h3>
+          <button class="modal-close" onclick="closeModal('termsModal')">
+            &times;
           </button>
-          <button type="button" id="nextBtn" class="btn btn-primary">
-            Επόμενο
-          </button>
-          <button
-            type="submit"
-            id="submitBtn"
-            class="btn btn-success"
-            style="display: none"
-          >
-            Συνέχεια στην Πληρωμή
+        </div>
+        <div class="modal-body">
+          <p><strong>1. Αποδοχή Όρων</strong></p>
+          <p>
+            Χρησιμοποιώντας την πλατφόρμα RentMe, αποδέχεστε αυτούς τους όρους
+            χρήσης.
+          </p>
+
+          <p><strong>2. Υπηρεσία</strong></p>
+          <p>
+            Το RentMe είναι πλατφόρμα που επιτρέπει στους χρήστες να δημοσιεύουν
+            προϊόντα προς ενοικίαση.
+          </p>
+
+          <p><strong>3. Υποχρεώσεις Χρήστη</strong></p>
+          <p>
+            Οι χρήστες είναι υπεύθυνοι για τη νομιμότητα των προϊόντων τους και
+            την ακρίβεια των στοιχείων τους.
+          </p>
+
+          <p><strong>4. Πληρωμές</strong></p>
+          <p>Οι συνδρομές χρεώνονται μηνιαίως και είναι μη επιστρεπτέες.</p>
+
+          <p><strong>5. Διακοπή Υπηρεσίας</strong></p>
+          <p>
+            Διατηρούμε το δικαίωμα διακοπής υπηρεσίας σε περίπτωση παραβίασης
+            των όρων.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Privacy Modal -->
+    <div id="privacyModal" class="modal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3>Πολιτική Απορρήτου</h3>
+          <button class="modal-close" onclick="closeModal('privacyModal')">
+            &times;
           </button>
         </div>
-      </form>
+        <div class="modal-body">
+          <p><strong>1. Συλλογή Δεδομένων</strong></p>
+          <p>
+            Συλλέγουμε μόνο τα απαραίτητα δεδομένα για τη λειτουργία της
+            υπηρεσίας.
+          </p>
+
+          <p><strong>2. Χρήση Δεδομένων</strong></p>
+          <p>
+            Τα δεδομένα σας χρησιμοποιούνται αποκλειστικά για τη λειτουργία της
+            πλατφόρμας.
+          </p>
+
+          <p><strong>3. Προστασία</strong></p>
+          <p>
+            Λαμβάνουμε όλα τα απαραίτητα μέτρα για την προστασία των προσωπικών
+            σας δεδομένων.
+          </p>
+
+          <p><strong>4. Δικαιώματα</strong></p>
+          <p>
+            Έχετε δικαίωμα πρόσβασης, διόρθωσης και διαγραφής των δεδομένων σας.
+          </p>
+
+          <p><strong>5. Επικοινωνία</strong></p>
+          <p>
+            Για ερωτήσεις σχετικά με την προστασία δεδομένων, επικοινωνήστε μαζί
+            μας.
+          </p>
+        </div>
+      </div>
     </div>
 
     <script src="/static/js/registration.js"></script>

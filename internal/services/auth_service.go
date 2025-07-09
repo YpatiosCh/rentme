@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/YpatiosCh/rentme/internal/err"
 	"github.com/YpatiosCh/rentme/internal/models"
 	"github.com/YpatiosCh/rentme/internal/repositories"
 	"github.com/YpatiosCh/rentme/pkg/hash"
@@ -26,66 +27,76 @@ func NewAuthService(userRepo repositories.UserRepository, jwt string) AuthServic
 	}
 }
 
-func (s *authService) RegisterUser(user *models.User, plainPassword string) (*models.User, error) {
+func (s *authService) RegisterUser(user *models.User, plainPassword string) (*models.User, *err.Error) {
+	var error err.Error
 	// Check if the user already exists
 	existingUser, err := s.userRepo.GetUserByEmail(user.Email)
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		return nil, fmt.Errorf("error checking existing user: %w", err)
+		error.Code = 500
+		error.Message = "Could not get user"
+		return nil, &error
 	}
 	if existingUser != nil {
-		return nil, errors.New("user already exists")
+		error.Code = 400
+		error.Message = "user already exists"
+		return nil, &error
 	}
 
 	// hash the password
 	hashedPassword, err := hash.Password(plainPassword)
 	if err != nil {
-		return nil, err
+		error.Code = 500
+		error.Message = "failed to hash password"
+		return nil, &error
 	}
 	user.PasswordHash = hashedPassword
 
-	// last login time is set to current time
-	currentTime := time.Now()
-	user.LastLoginAt = &currentTime
-
-	// increment the login count
-	user.LoginCount++
-
 	// create the user in the repository
-	return s.userRepo.CreateUser(user)
+	user, err = s.userRepo.CreateUser(user)
+	if err != nil {
+		error.Code = 500
+		error.Message = "failed to create user in database"
+		return nil, &error
+	}
+
+	return user, nil
 }
 
-func (s *authService) LoginUser(email, plainPassword string) (*models.User, error) {
+func (s *authService) LoginUser(email, plainPassword string) (*models.User, *err.Error) {
+	var error err.Error
 	// Fetch the user by email
 	user, err := s.userRepo.GetUserByEmail(email)
 	if err != nil {
-		return nil, fmt.Errorf("error fetching user: %w", err)
+		error.Code = 500
+		error.Message = "error fetching user"
+		return nil, &error
 	}
 	if user == nil {
-		return nil, errors.New("invalid credentials: user not found")
-	}
-	// Check if the user is active or banned
-	if !user.IsActive {
-		return nil, errors.New("account is inactive")
-	}
-	if user.IsBanned {
-		return nil, errors.New("account is banned")
+		error.Code = 400
+		error.Message = "invalid credentials: user not found"
+		return nil, &error
 	}
 
 	// Verify the password
 	if err = hash.Check(plainPassword, user.PasswordHash); err != nil {
-		return nil, errors.New("invalid credentials")
+		error.Code = 400
+		error.Message = "invalid credentials"
+		return nil, &error
 	}
 
-	// Update last login time and increment login count
-	currentTime := time.Now()
-	user.LastLoginAt = &currentTime
-	user.LoginCount++
-
 	// Save the updated user
-	return s.userRepo.UpdateUser(user)
+	user, err = s.userRepo.UpdateUser(user)
+	if err != nil {
+		error.Code = 500
+		error.Message = "failed to update user in database"
+		return nil, &error
+	}
+
+	return user, nil
 }
 
-func (s *authService) GenerateToken(userID uuid.UUID) (string, error) {
+func (s *authService) GenerateToken(userID uuid.UUID) (string, *err.Error) {
+	var error err.Error
 	claims := jwt.MapClaims{
 		"user_id": userID.String(),
 		"exp":     time.Now().Add(time.Hour * 24 * 7).Unix(), // 7 days
@@ -95,13 +106,16 @@ func (s *authService) GenerateToken(userID uuid.UUID) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	tokenString, err := token.SignedString([]byte(s.jwtSecret))
 	if err != nil {
-		return "", err
+		error.Code = 500
+		error.Message = "failed to sign token"
+		return "", &error
 	}
 
 	return tokenString, nil
 }
 
-func (s *authService) ValidateToken(tokenString string) (*uuid.UUID, error) {
+func (s *authService) ValidateToken(tokenString string) (*uuid.UUID, *err.Error) {
+	var er err.Error
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
@@ -110,22 +124,29 @@ func (s *authService) ValidateToken(tokenString string) (*uuid.UUID, error) {
 	})
 
 	if err != nil {
-		return nil, err
+		er.Code = 500
+		er.Message = "unexpected signing method"
+		return nil, &er
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		userIDStr, ok := claims["user_id"].(string)
 		if !ok {
-			return nil, errors.New("invalid token claims")
+			er.Code = 500
+			er.Message = "invalid token claims"
+			return nil, &er
 		}
 
 		userID, err := uuid.Parse(userIDStr)
 		if err != nil {
-			return nil, errors.New("invalid user ID in token")
+			er.Code = 500
+			er.Message = "invalid user ID in token"
+			return nil, &er
 		}
 
 		return &userID, nil
 	}
-
-	return nil, errors.New("invalid token")
+	er.Code = 500
+	er.Message = "invalid token"
+	return nil, &er
 }

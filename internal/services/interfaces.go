@@ -24,5 +24,5 @@ type SubscriptionService interface {
 }
 
 type AuthService interface {
-	RegisterUser(user *models.User, plainPassword string) (*models.User, error)
+	RegisterUser(user *models.User, plainPassword string) (*models.User, *err.Error)
 }

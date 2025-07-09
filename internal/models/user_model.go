@@ -12,36 +12,6 @@ type User struct {
 	Email        string    `gorm:"type:varchar(255);uniqueIndex;not null"`
 	PasswordHash string    `gorm:"type:varchar(255);not null" json:"-"`
 
-	// Personal Information
-	FirstName string  `gorm:"type:varchar(100);not null"`
-	LastName  string  `gorm:"type:varchar(100);not null"`
-	Phone     string  `gorm:"type:varchar(20);not null"` // Required for contact
-	Website   *string `gorm:"type:varchar(255)"`         // Optional business website
-
-	// Business Information (for owners)
-	BusinessName        *string `gorm:"type:varchar(255)"` // Optional business name
-	BusinessDescription *string `gorm:"type:text"`         // Business description for profile
-
-	// Address Information (required for product location context)
-	Address    string   `gorm:"type:varchar(255);not null"`
-	City       string   `gorm:"type:varchar(100);not null"`
-	Region     string   `gorm:"type:varchar(100);not null"` // Περιοχή
-	PostalCode string   `gorm:"type:varchar(10);not null"`
-	Prefecture string   `gorm:"type:varchar(100);not null"` // Νομός
-	Country    string   `gorm:"type:varchar(50);not null;default:'Greece'"`
-	Latitude   *float64 `gorm:"type:decimal(10,8)"` // For map functionality
-	Longitude  *float64 `gorm:"type:decimal(11,8)"` // For map functionality
-
-	// Account Status
-	IsActive    bool       `gorm:"default:true;index"`
-	IsBanned    bool       `gorm:"default:false;index"`
-	BannedUntil *time.Time `gorm:"type:timestamp"`
-	BanReason   *string    `gorm:"type:varchar(500)"`
-
-	// Email Verification
-	EmailVerified   bool       `gorm:"default:false;index"`
-	EmailVerifiedAt *time.Time `gorm:"type:timestamp"`
-
 	// Subscription Information
 	SubscriptionPlan   *string    `gorm:"type:varchar(20);index"` // "basic", "professional", "business"
 	SubscriptionStatus *string    `gorm:"type:varchar(20);index"` // "active", "canceled", "past_due", "unpaid"
@@ -56,27 +26,7 @@ type User struct {
 	MaxPhotosPerProduct   int `gorm:"default:0"` // Max photos per product
 	FeaturedListingsUsed  int `gorm:"default:0"` // Used featured listings this month
 	FeaturedListingsLimit int `gorm:"default:0"` // Max featured listings per month
-
-	// Activity Tracking
-	LastLoginAt       *time.Time `gorm:"type:timestamp;index"`
-	LoginCount        int        `gorm:"default:0"`
-	ProductViewsTotal int        `gorm:"default:0"` // Total views across all products
-	ContactsTotal     int        `gorm:"default:0"` // Total contacts received
-
-	// Communication Preferences
-	EmailNotifications bool `gorm:"default:true"`  // Receive email notifications
-	WeeklyReports      bool `gorm:"default:true"`  // Weekly analytics reports
-	MarketingEmails    bool `gorm:"default:false"` // Marketing communications
-
-	// Profile Settings
-	ProfilePublic     bool `gorm:"default:true"` // Show profile to visitors
-	ShowPhone         bool `gorm:"default:true"` // Show phone in product listings
-	ShowEmail         bool `gorm:"default:true"` // Show email in product listings
-	ShowWebsite       bool `gorm:"default:true"` // Show website in product listings
-	ResponseTimeHours *int `gorm:"default:24"`   // Expected response time
-
-	// Analytics Preferences
-	AllowAnalytics bool `gorm:"default:true"` // Allow platform to track analytics
+	ProductCount          int `gorm:"default:0"`
 
 	// Timestamps
 	CreatedAt time.Time       `gorm:"type:timestamp;default:CURRENT_TIMESTAMP"`
@@ -124,21 +74,6 @@ func (u *User) GetPlanDisplayName() string {
 	default:
 		return "Unknown Plan"
 	}
-}
-
-func (u *User) GetFullName() string {
-	return u.FirstName + " " + u.LastName
-}
-
-func (u *User) GetDisplayName() string {
-	if u.BusinessName != nil && *u.BusinessName != "" {
-		return *u.BusinessName
-	}
-	return u.GetFullName()
-}
-
-func (u *User) GetLocationString() string {
-	return u.City + ", " + u.Region
 }
 
 // This would need to be implemented with a count query in the repository

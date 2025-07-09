@@ -1,14 +1,304 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="el">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RentMe</title>
+    <title>RentMe - Νοίκιασε ό,τι χρειάζεσαι</title>
+    <link rel="stylesheet" href="/static/css/landing.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <nav class="nav">
+                <div class="logo">
+                    <h1>RentMe</h1>
+                </div>
+                <div class="nav-actions">
+                    <a href="/register" class="btn btn-primary">Καταχώρησε προϊόν</a>
+                </div>
+            </nav>
+        </div>
+    </header>
 
-    <h1>Καλως ηρθατε στο RentMe</h1>
-    <p>Η πρωτη P2P πλατφορμα ενοικιασης προιοντων στην Ελλαδα</p>
-    <p><a href="/register">Ενοικιασε το προιον σου </a></p>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Νοίκιασε ό,τι χρειάζεσαι.<br>Από ανθρώπους κοντά σου.</h1>
+                <p>Εργαλεία, κάμερες, οχήματα και εξοπλισμός από ιδιώτες στην περιοχή σου.<br>Ή κέρδισε από αντικείμενα που έχεις ήδη.</p>
+                
+                <!-- Search Engine -->
+                <div class="search-container">
+                    <div class="search-wrapper">
+                        <div class="search-input-container">
+                            <input 
+                                type="text" 
+                                id="searchInput" 
+                                placeholder="Τι ψάχνεις; (π.χ. κάμερα, δράπανο, ποδήλατο)"
+                                class="search-input"
+                            >
+                            <button class="search-btn" id="searchBtn">
+                                <span class="search-icon">🔍</span>
+                                <span class="search-text">Αναζήτηση</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Location Filter -->
+                        <div class="location-container">
+                            <div class="location-input-wrapper">
+                                <span class="location-icon">📍</span>
+                                <input 
+                                    type="text" 
+                                    id="locationInput" 
+                                    placeholder="Περιοχή"
+                                    class="location-input"
+                                    value="Αθήνα"
+                                >
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Filters -->
+                    <div class="quick-filters">
+                        <button class="filter-tag active" data-category="all">Όλα</button>
+                        <button class="filter-tag" data-category="camera">📷 Κάμερες</button>
+                        <button class="filter-tag" data-category="tools">🔧 Εργαλεία</button>
+                        <button class="filter-tag" data-category="vehicles">🚲 Οχήματα</button>
+                        <button class="filter-tag" data-category="audio">🎵 Ήχος</button>
+                        <button class="filter-tag" data-category="events">🎉 Events</button>
+                    </div>
+                </div>
+
+                <!-- Hero Stats -->
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-number">1,200+</span>
+                        <span class="stat-label">Διαθέσιμα προϊόντα</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">350+</span>
+                        <span class="stat-label">Ενεργοί χρήστες</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-number">50+</span>
+                        <span class="stat-label">Πόλεις</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Categories -->
+    <section class="categories">
+        <div class="container">
+            <h2>Δημοφιλείς Κατηγορίες</h2>
+            <div class="categories-grid">
+                <div class="category-card">
+                    <div class="category-icon">📷</div>
+                    <h3>Φωτογραφικός εξοπλισμός</h3>
+                    <span class="category-count">280+ προϊόντα</span>
+                </div>
+                <div class="category-card">
+                    <div class="category-icon">🔧</div>
+                    <h3>Εργαλεία & Μηχανήματα</h3>
+                    <span class="category-count">420+ προϊόντα</span>
+                </div>
+                <div class="category-card">
+                    <div class="category-icon">🎵</div>
+                    <h3>Ηχητικός εξοπλισμός</h3>
+                    <span class="category-count">150+ προϊόντα</span>
+                </div>
+                <div class="category-card">
+                    <div class="category-icon">🚲</div>
+                    <h3>Μεταφορικά μέσα</h3>
+                    <span class="category-count">190+ προϊόντα</span>
+                </div>
+                <div class="category-card">
+                    <div class="category-icon">🎉</div>
+                    <h3>Είδη Events</h3>
+                    <span class="category-count">160+ προϊόντα</span>
+                </div>
+                <div class="category-card">
+                    <div class="category-icon">⚡</div>
+                    <h3>Επαγγελματικός εξοπλισμός</h3>
+                    <span class="category-count">110+ προϊόντα</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How it works -->
+    <section class="how-it-works">
+        <div class="container">
+            <h2>Πώς λειτουργεί</h2>
+            <div class="steps-grid">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Αναζητάς</h3>
+                    <p>Βρίσκεις το προϊόν που χρειάζεσαι κοντά σου</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Επικοινωνείς</h3>
+                    <p>Στέλνεις μήνυμα στον ιδιοκτήτη</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Νοικιάζεις</h3>
+                    <p>Παραλαμβάνεις και χρησιμοποιείς</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- For Owners -->
+    <section class="for-owners">
+        <div class="container">
+            <div class="split-content">
+                <div class="content-text">
+                    <h2>Κέρδισε από αντικείμενα που έχεις</h2>
+                    <p>Ανέβασε προϊόντα που δεν χρησιμοποιείς συνεχώς και κέρδισε επιπλέον εισόδημα.</p>
+                    
+                    <div class="benefits-list">
+                        <div class="benefit">✓ Εύκολη καταχώρηση</div>
+                        <div class="benefit">✓ Αυτόματο συμφωνητικό</div>
+                        <div class="benefit">✓ Άμεση επικοινωνία</div>
+                    </div>
+                    
+                    <a href="/register" class="btn btn-primary">Ξεκίνα τώρα</a>
+                </div>
+                <div class="content-visual">
+                    <div class="earnings-card">
+                        <h4>Παράδειγμα εσόδων/μήνα:</h4>
+                        <div class="earning-item">
+                            <span>Φωτογραφική μηχανή</span>
+                            <span>€180</span>
+                        </div>
+                        <div class="earning-item">
+                            <span>Δράπανο</span>
+                            <span>€95</span>
+                        </div>
+                        <div class="earning-item">
+                            <span>Ποδήλατο</span>
+                            <span>€140</span>
+                        </div>
+                        <div class="total-earning">
+                            <span>Σύνολο</span>
+                            <span>€415</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Ξεκίνα σήμερα</h2>
+                <p>Βρες τι χρειάζεσαι ή κέρδισε από αυτά που έχεις</p>
+                
+                <div class="cta-actions">
+                    <button class="btn btn-primary" onclick="focusSearch()">Αναζήτηση προϊόντων</button>
+                    <a href="/register" class="btn btn-outline">Καταχώρηση προϊόντος</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <h3>RentMe</h3>
+                    <p>Η πλατφόρμα που συνδέει όσους έχουν με όσους χρειάζονται.</p>
+                </div>
+                <div class="footer-links">
+                    <div class="footer-section">
+                        <h4>Πλατφόρμα</h4>
+                        <a href="#search">Αναζήτηση</a>
+                        <a href="/register">Καταχώρηση</a>
+                    </div>
+                    <div class="footer-section">
+                        <h4>Υποστήριξη</h4>
+                        <a href="/terms">Όροι χρήσης</a>
+                        <a href="/privacy">Απόρρητο</a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 RentMe. Όλα τα δικαιώματα διατηρούνται.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Mobile CTA -->
+    <div class="mobile-cta">
+        <a href="/register" class="btn btn-primary">+ Καταχώρησε προϊόν</a>
+    </div>
+
+    <script>
+        // Search functionality
+        function focusSearch() {
+            document.getElementById('searchInput').focus();
+            document.querySelector('.hero').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Filter tags
+        document.querySelectorAll('.filter-tag').forEach(tag => {
+            tag.addEventListener('click', function() {
+                document.querySelectorAll('.filter-tag').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+                
+                const category = this.dataset.category;
+                // Here you would implement actual filtering
+                console.log('Filtering by:', category);
+            });
+        });
+
+        // Search on enter
+        document.getElementById('searchInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+
+        document.getElementById('searchBtn').addEventListener('click', performSearch);
+
+        function performSearch() {
+            const query = document.getElementById('searchInput').value;
+            const location = document.getElementById('locationInput').value;
+            
+            if (query.trim()) {
+                // Here you would implement actual search
+                console.log('Searching for:', query, 'in', location);
+                // For now, redirect to a search results page
+                // window.location.href = `/search?q=${encodeURIComponent(query)}&loc=${encodeURIComponent(location)}`;
+                alert(`Αναζήτηση για: "${query}" στην περιοχή: "${location}"`);
+            }
+        }
+
+        // Mobile menu toggle (if needed later)
+        let lastScrollY = window.scrollY;
+        const header = document.querySelector('.header');
+        const mobileCta = document.querySelector('.mobile-cta');
+
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > lastScrollY && window.scrollY > 100) {
+                header.style.transform = 'translateY(-100%)';
+                if (mobileCta) mobileCta.style.transform = 'translateY(0)';
+            } else {
+                header.style.transform = 'translateY(0)';
+                if (mobileCta) mobileCta.style.transform = 'translateY(100%)';
+            }
+            lastScrollY = window.scrollY;
+        });
+    </script>
 </body>
 </html>
