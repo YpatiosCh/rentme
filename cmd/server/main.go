@@ -25,10 +25,16 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 
-	// initialize stripe configuration
+	// Validate Stripe configuration
+	if err := config.ValidateStripeConfig(); err != nil {
+		log.Printf("Warning: Stripe configuration issue: %v", err)
+		log.Println("Some Stripe features may not work properly")
+	}
+
+	// Initialize stripe configuration
 	config.InitStripe()
 
-	// connect to database
+	// Connect to database
 	DB, err = database.Connect()
 	if err != nil {
 		log.Fatal("Failed to connect to database:", err)
@@ -48,34 +54,36 @@ func main() {
 		log.Fatal("Failed to run migrations:", err)
 	}
 
-	// initialize repositories
+	// Initialize repositories
 	repos := repositories.NewRepositoryContainer(DB)
 
-	// create the services dependency
+	// Create the services dependency
 	jwtSecret := os.Getenv("JWT_SECRET")
+	if jwtSecret == "" {
+		log.Fatal("JWT_SECRET environment variable is required")
+	}
+
 	dependency := services.Dependency{
 		Repos:     repos,
 		JwtSecret: jwtSecret,
 	}
 
-	// initialize services
+	// Initialize services
 	services := services.NewServiceContainer(dependency)
 
-	// var user models.User
-	// user.Email = "ypatios@gmail.com"
-	// user.FirstName = "Ypatios"
-	// user.LastName = "Chanio"
-	// _, err = services.Auth().RegisterUser(&user, "password123")
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-
-	// setup routes
+	// Setup routes
 	router := routes.SetupRoutes(services)
 
 	// Start the server
 	PORT := os.Getenv("PORT")
-	log.Println("Starting server on :", PORT)
+	if PORT == "" {
+		PORT = "8080" // Default port
+	}
+
+	log.Printf("Starting server on port: %s", PORT)
+	log.Printf("Base URL: %s", os.Getenv("BASE_URL"))
+	log.Printf("Registration available at: %s/register", os.Getenv("BASE_URL"))
+
 	if err := http.ListenAndServe(":"+PORT, router); err != nil {
 		log.Fatal("Failed to start server:", err)
 	}

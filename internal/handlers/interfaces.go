@@ -18,4 +18,7 @@ type UserHandler interface {
 
 type AuthHandler interface {
 	ShowRegistrationForm(w http.ResponseWriter, r *http.Request)
+	CreateSubscription(w http.ResponseWriter, r *http.Request)
+	GetStripeConfig(w http.ResponseWriter, r *http.Request)
+	CompleteRegistration(w http.ResponseWriter, r *http.Request)
 }

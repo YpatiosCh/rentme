@@ -1,5 +1,8 @@
 let currentStep = 1;
 let selectedPlan = null;
+let stripe;
+let elements;
+let paymentElement;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', function() {
@@ -9,6 +12,86 @@ document.addEventListener('DOMContentLoaded', function() {
     setupPasswordValidation();
     updateView();
 });
+
+// Initialize Stripe
+async function initializeStripe() {
+    try {
+        // Get publishable key from backend
+        const response = await fetch('/stripe/config');
+        const config = await response.json();
+        
+        if (config.publishable_key) {
+            stripe = Stripe(config.publishable_key);
+            elements = stripe.elements();
+        } else {
+            console.error('Failed to get Stripe publishable key');
+        }
+    } catch (error) {
+        console.error('Error initializing Stripe:', error);
+    }
+    
+    // Create card element
+    cardElement = elements.create('card', {
+        style: {
+            base: {
+                fontSize: '15px',
+                color: '#2d3748',
+                fontFamily: '"Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+                '::placeholder': {
+                    color: '#a0aec0',
+                },
+            },
+            invalid: {
+                color: '#e53e3e',
+            },
+        },
+    });
+}
+
+// Mount card elements when Step 3 becomes active
+function mountCardElements() {
+    if (cardNumberElement && !cardNumberElement._mounted) {
+        try {
+            cardNumberElement.mount('#card-number-element');
+            cardExpiryElement.mount('#card-expiry-element');
+            cardCvcElement.mount('#card-cvc-element');
+            
+            cardNumberElement._mounted = true;
+            
+            console.log('Card elements mounted successfully');
+            
+            // Handle real-time validation errors
+            cardNumberElement.addEventListener('change', function(event) {
+                handleCardError(event, 'card-number-errors', 'card-number-element');
+            });
+            
+            cardExpiryElement.addEventListener('change', function(event) {
+                handleCardError(event, 'card-expiry-errors', 'card-expiry-element');
+            });
+            
+            cardCvcElement.addEventListener('change', function(event) {
+                handleCardError(event, 'card-cvc-errors', 'card-cvc-element');
+            });
+        } catch (error) {
+            console.error('Error mounting card elements:', error);
+        }
+    } else {
+        console.log('Card elements already mounted or not initialized');
+    }
+}
+
+function handleCardError(event, errorElementId, inputElementId) {
+    const displayError = document.getElementById(errorElementId);
+    const cardInput = document.getElementById(inputElementId);
+    
+    if (event.error) {
+        displayError.textContent = event.error.message;
+        cardInput.classList.add('error');
+    } else {
+        displayError.textContent = '';
+        cardInput.classList.remove('error');
+    }
+}
 
 // Password Validation
 function setupPasswordValidation() {
@@ -55,11 +138,10 @@ function setupPlanSelection() {
     });
 }
 
-// Navigation
 function setupNavigation() {
     document.getElementById('nextBtn').addEventListener('click', nextStep);
     document.getElementById('prevBtn').addEventListener('click', prevStep);
-    document.getElementById('registrationForm').addEventListener('submit', handleSubmit);
+    document.getElementById('submitBtn').addEventListener('click', handleSubmit);
 }
 
 // Terms Checkbox
@@ -100,7 +182,6 @@ function showFieldError(fieldName, message) {
 function validateStep1() {
     let isValid = true;
     
-    // Clear all previous errors
     clearFieldError('email');
     clearFieldError('password');
     clearFieldError('confirmPassword');
@@ -111,7 +192,6 @@ function validateStep1() {
     const confirmPassword = document.getElementById('confirmPassword').value;
     const termsAccepted = document.getElementById('termsAccepted').checked;
     
-    // Email validation
     if (!email) {
         showFieldError('email', 'Το email είναι υποχρεωτικό');
         isValid = false;
@@ -120,7 +200,6 @@ function validateStep1() {
         isValid = false;
     }
     
-    // Password validation
     if (!password) {
         showFieldError('password', 'Ο κωδικός είναι υποχρεωτικός');
         isValid = false;
@@ -129,7 +208,6 @@ function validateStep1() {
         isValid = false;
     }
     
-    // Confirm password validation
     if (!confirmPassword) {
         showFieldError('confirmPassword', 'Η επιβεβαίωση κωδικού είναι υποχρεωτική');
         isValid = false;
@@ -138,7 +216,6 @@ function validateStep1() {
         isValid = false;
     }
     
-    // Terms validation
     if (!termsAccepted) {
         showFieldError('terms', 'Πρέπει να αποδεχτείς τους Όρους Χρήσης και την Πολιτική Απορρήτου');
         isValid = false;
@@ -172,12 +249,22 @@ function nextStep() {
             currentStep = 2;
             updateView();
         }
+    } else if (currentStep === 2) {
+        if (validateStep2()) {
+            currentStep = 3;
+            updateView();
+            updateFinalPlanSummary();
+            initializePayment(); // Initialize payment when entering Step 3
+        }
     }
 }
 
 // Previous Step
 function prevStep() {
-    if (currentStep === 2) {
+    if (currentStep === 3) {
+        currentStep = 2;
+        updateView();
+    } else if (currentStep === 2) {
         currentStep = 1;
         updateView();
     }
@@ -195,7 +282,7 @@ function updateView() {
     
     // Update progress bar
     const progressFill = document.getElementById('progressFill');
-    progressFill.style.width = (currentStep / 2) * 100 + '%';
+    progressFill.style.width = (currentStep / 3) * 100 + '%';
     
     // Update step dots
     document.querySelectorAll('.step-dot').forEach((dot, index) => {
@@ -216,23 +303,18 @@ function updateButtons() {
     const submitBtn = document.getElementById('submitBtn');
 
     if (currentStep === 1) {
-        // Step 1: Email, Password, Όροι
         prevBtn.classList.add('hidden');
         nextBtn.classList.remove('hidden');
         submitBtn.classList.add('hidden');
-
     } else if (currentStep === 2) {
-        // Step 2: Plan Selection
+        prevBtn.classList.remove('hidden');
+        nextBtn.classList.remove('hidden');
+        submitBtn.classList.add('hidden');
+    } else if (currentStep === 3) {
         prevBtn.classList.remove('hidden');
         nextBtn.classList.add('hidden');
-
-        if (selectedPlan) {
-            submitBtn.classList.remove('hidden');
-            submitBtn.disabled = false;
-        } else {
-            submitBtn.classList.remove('hidden');
-            submitBtn.disabled = true;
-        }
+        submitBtn.classList.remove('hidden');
+        submitBtn.disabled = false;
     }
 }
 
@@ -257,46 +339,135 @@ function updatePlanSummary() {
     }
 }
 
+// Update Final Plan Summary for Step 3
+function updateFinalPlanSummary() {
+    const planNames = {
+        'basic': 'Basic Plan',
+        'professional': 'Professional Plan',
+        'business': 'Business Plan'
+    };
+    
+    const planPrices = {
+        'basic': '€10/μήνα',
+        'professional': '€20/μήνα',
+        'business': '€40/μήνα'
+    };
+    
+    if (selectedPlan) {
+        document.getElementById('finalPlanName').textContent = planNames[selectedPlan];
+        document.getElementById('finalPlanPrice').textContent = planPrices[selectedPlan];
+    }
+}
 // Handle Form Submit
 async function handleSubmit(e) {
     e.preventDefault();
-    
-    // Final validation
-    if (!validateStep2()) {
-        return;
-    }
     
     const submitBtn = document.getElementById('submitBtn');
     submitBtn.textContent = 'Επεξεργασία...';
     submitBtn.disabled = true;
     
-    const formData = {
-        plan_id: selectedPlan,
-        email: document.getElementById('email').value.trim(),
-        password: document.getElementById('password').value,
-        terms_accepted: document.getElementById('termsAccepted').checked
-    };
-    
     try {
-        const response = await fetch('/register', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData)
+        // Confirm payment for subscription
+        const { error, paymentIntent } = await stripe.confirmPayment({
+            elements,
+            redirect: 'if_required',
         });
-        
-        const result = await response.json();
-        
-        if (result.checkout_url) {
-            window.location.href = result.checkout_url;
+
+        if (error) {
+            showPopup('error', 'Σφάλμα πληρωμής', error.message);
+        } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+            // Payment successful - complete registration with subscription data
+            try {
+                const registrationData = {
+                    email: document.getElementById('email').value.trim(),
+                    password: document.getElementById('password').value,
+                    plan_id: selectedPlan,
+                    payment_intent_id: paymentIntent.id,
+                    subscription_id: window.subscriptionData.subscriptionId,
+                    customer_id: window.subscriptionData.customerId
+                };
+                
+                const regResponse = await fetch('/complete-registration', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(registrationData)
+                });
+                
+                if (regResponse.ok) {
+                    showPopup('success', 'Επιτυχία!', 'Η εγγραφή σας ολοκληρώθηκε επιτυχώς! Το subscription σας είναι ενεργό.', true);
+                } else {
+                    const errorData = await regResponse.json();
+                    showPopup('error', 'Σφάλμα εγγραφής', 
+                        errorData.message || 'Η πληρωμή ήταν επιτυχής αλλά υπήρξε πρόβλημα με την εγγραφή');
+                }
+                
+            } catch (registrationError) {
+                console.error('Registration error:', registrationError);
+                showPopup('error', 'Σφάλμα εγγραφής', 
+                    'Η πληρωμή ήταν επιτυχής αλλά υπήρξε πρόβλημα με την εγγραφή. Επικοινωνήστε μαζί μας.');
+            }
         } else {
-            alert('Σφάλμα: ' + (result.error || 'Άγνωστο σφάλμα'));
+            showPopup('error', 'Σφάλμα πληρωμής', 'Η πληρωμή δεν ολοκληρώθηκε. Δοκιμάστε ξανά.');
         }
         
     } catch (error) {
-        alert('Σφάλμα δικτύου. Δοκιμάστε ξανά.');
+        console.error('Payment error:', error);
+        showPopup('error', 'Σφάλμα δικτύου', 'Παρουσιάστηκε σφάλμα. Δοκιμάστε ξανά.');
     } finally {
         submitBtn.textContent = 'Πληρωμή τώρα';
         submitBtn.disabled = false;
+    }
+}
+
+// Show popup with message
+function showPopup(type, title, message, withCountdown = false) {
+    const popup = document.getElementById('messagePopup');
+    const icon = document.getElementById('popupIcon');
+    const titleEl = document.getElementById('popupTitle');
+    const messageEl = document.getElementById('popupMessage');
+    const countdown = document.getElementById('popupCountdown');
+    const closeBtn = document.getElementById('popupCloseBtn');
+    
+    // Set content
+    titleEl.textContent = title;
+    messageEl.textContent = message;
+    
+    // Set type
+    popup.className = `popup-overlay ${type}`;
+    
+    if (type === 'success') {
+        icon.textContent = '✅';
+    } else {
+        icon.textContent = '❌';
+    }
+    
+    // Show popup
+    popup.classList.remove('hidden');
+    
+    // Handle countdown and redirect
+    if (withCountdown) {
+        countdown.classList.remove('hidden');
+        closeBtn.style.display = 'none';
+        
+        let timeLeft = 4;
+        const countdownNumber = document.getElementById('countdownNumber');
+        
+        const timer = setInterval(() => {
+            timeLeft--;
+            countdownNumber.textContent = timeLeft;
+            
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                window.location.href = '/';
+            }
+        }, 1000);
+    } else {
+        countdown.classList.add('hidden');
+        closeBtn.style.display = 'inline-flex';
+        
+        closeBtn.onclick = function() {
+            popup.classList.add('hidden');
+        };
     }
 }
 
@@ -332,4 +503,51 @@ document.addEventListener('click', function(e) {
     if (e.target.classList.contains('modal')) {
         e.target.classList.remove('active');
     }
+    
+    if (e.target.classList.contains('popup-overlay')) {
+        e.target.classList.add('hidden');
+    }
 });
+// Initialize Stripe and get clientSecret when Step 3 loads
+async function initializePayment() {
+    try {
+        // Get publishable key
+        const configResponse = await fetch('/stripe/config');
+        const config = await configResponse.json();
+        
+        if (!config.publishable_key) {
+            console.error('Failed to get Stripe publishable key');
+            return;
+        }
+        
+        stripe = Stripe(config.publishable_key);
+        
+        // Create Subscription
+        const paymentResponse = await fetch('/create-subscription', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                plan_id: selectedPlan,
+                email: document.getElementById('email').value.trim()
+            })
+        });
+        
+        const { clientSecret, subscriptionId, customerId } = await paymentResponse.json();
+        console.log('Got subscription data:', { clientSecret, subscriptionId, customerId });
+        
+        // Store subscription data for later use
+        window.subscriptionData = { subscriptionId, customerId };
+        
+        // Initialize Elements
+        elements = stripe.elements({ clientSecret });
+        
+        // Create Payment Element
+        paymentElement = elements.create('payment');
+        paymentElement.mount('#payment-element');
+        
+        console.log('Subscription payment initialized successfully');
+        
+    } catch (error) {
+        console.error('Error initializing payment:', error);
+    }
+}

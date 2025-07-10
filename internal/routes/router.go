@@ -25,7 +25,19 @@ func SetupRoutes(services services.Services) http.Handler {
 	mux.HandleFunc("/", handlers.Home().Home)
 
 	// Authentication endpoints
-	mux.HandleFunc("/register", handlers.Auth().ShowRegistrationForm)
+	mux.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			handlers.Auth().ShowRegistrationForm(w, r)
+		default:
+			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		}
+	})
+
+	// Payment endpoints
+	mux.HandleFunc("/create-subscription", handlers.Auth().CreateSubscription)
+	mux.HandleFunc("/complete-registration", handlers.Auth().CompleteRegistration)
+	mux.HandleFunc("/stripe/config", handlers.Auth().GetStripeConfig)
 
 	// User endpoints
 	mux.HandleFunc("/users", handlers.User().GetAllUsers)

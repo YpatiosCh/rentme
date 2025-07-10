@@ -8,16 +8,14 @@ type Dependency struct {
 }
 
 type ServiceContainer struct {
-	userService         UserService
-	authService         AuthService
-	subscriptionService SubscriptionService
+	userService UserService
+	authService AuthService
 }
 
 func NewServiceContainer(d Dependency) Services {
 	return &ServiceContainer{
-		userService:         NewUserService(d.Repos.User()),
-		authService:         NewAuthService(d.Repos.User(), d.JwtSecret),
-		subscriptionService: NewSubscriptionService(d.Repos.User()),
+		userService: NewUserService(d.Repos.User()),
+		authService: NewAuthService(d.Repos.User(), d.JwtSecret),
 	}
 }
 
@@ -27,8 +25,4 @@ func (s *ServiceContainer) User() UserService {
 
 func (s *ServiceContainer) Auth() AuthService {
 	return s.authService
-}
-
-func (s *ServiceContainer) Subscription() SubscriptionService {
-	return s.subscriptionService
 }

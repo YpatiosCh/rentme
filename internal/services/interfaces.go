@@ -9,7 +9,6 @@ import (
 type Services interface {
 	User() UserService
 	Auth() AuthService
-	Subscription() SubscriptionService
 }
 
 type UserService interface {
@@ -20,9 +19,7 @@ type UserService interface {
 	GetAllUsers() (*[]models.User, *err.Error)
 }
 
-type SubscriptionService interface {
-}
-
 type AuthService interface {
 	RegisterUser(user *models.User, plainPassword string) (*models.User, *err.Error)
+	GenerateToken(userID uuid.UUID) (string, *err.Error)
 }
