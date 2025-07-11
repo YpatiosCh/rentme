@@ -7,6 +7,7 @@ type Handlers interface {
 	User() UserHandler
 	Auth() AuthHandler
 	Item() ItemHandler
+	Subscribe() SubHandler
 }
 
 type HomeHandler interface {
@@ -19,13 +20,18 @@ type UserHandler interface {
 
 type AuthHandler interface {
 	ShowRegistrationForm(w http.ResponseWriter, r *http.Request)
-	CreateSubscription(w http.ResponseWriter, r *http.Request)
-	GetStripeConfig(w http.ResponseWriter, r *http.Request)
+
 	CompleteRegistration(w http.ResponseWriter, r *http.Request)
-	StripeWebhook(w http.ResponseWriter, r *http.Request)
+
 	Logout(w http.ResponseWriter, r *http.Request)
 }
 
 type ItemHandler interface {
 	CreateItemForm(w http.ResponseWriter, r *http.Request)
+}
+
+type SubHandler interface {
+	CreateSubscription(w http.ResponseWriter, r *http.Request)
+	GetStripeConfig(w http.ResponseWriter, r *http.Request)
+	StripeWebhook(w http.ResponseWriter, r *http.Request)
 }

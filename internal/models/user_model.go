@@ -3,6 +3,7 @@ package models
 import (
 	"time"
 
+	"github.com/YpatiosCh/rentme/internal/config"
 	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
@@ -18,6 +19,7 @@ type User struct {
 	SubscriptionID     *string    `gorm:"type:varchar(255)"`      // Stripe subscription ID
 	CustomerID         *string    `gorm:"type:varchar(255)"`      // Stripe customer ID
 	PlanStartDate      *time.Time `gorm:"type:timestamp"`
+	NextBillingDate    *time.Time
 	PlanEndDate        *time.Time `gorm:"type:timestamp"`
 	TrialEndDate       *time.Time `gorm:"type:timestamp"`
 
@@ -89,16 +91,16 @@ func (u *User) SetSubscriptionLimits(plan string) {
 
 	switch plan {
 	case "basic":
-		u.MaxProducts = 5
-		u.MaxPhotosPerProduct = 5
-		u.FeaturedListingsLimit = 0
+		u.MaxProducts = config.GetIntEnvOrDefault("BASIC_MAX_PRODUCTS", 3)
+		u.MaxPhotosPerProduct = config.GetIntEnvOrDefault("BASIC_MAX_PHOTOS", 3)
+		u.FeaturedListingsLimit = config.GetIntEnvOrDefault("BASIC_FEATURED_LISTINGS", 0)
 	case "professional":
-		u.MaxProducts = 15
-		u.MaxPhotosPerProduct = 10
-		u.FeaturedListingsLimit = 2
+		u.MaxProducts = config.GetIntEnvOrDefault("PROFESSIONAL_MAX_PRODUCTS", 10)
+		u.MaxPhotosPerProduct = config.GetIntEnvOrDefault("PROFESSIONAL_MAX_PHOTOS", 10)
+		u.FeaturedListingsLimit = config.GetIntEnvOrDefault("PROFESSIONAL_FEATURED_LISTINGS", 2)
 	case "business":
-		u.MaxProducts = 999999         // Unlimited
-		u.MaxPhotosPerProduct = 999999 // Unlimited
-		u.FeaturedListingsLimit = 10
+		u.MaxProducts = config.GetIntEnvOrDefault("BUSINESS_MAX_PRODUCTS", 999999)
+		u.MaxPhotosPerProduct = config.GetIntEnvOrDefault("BUSINESS_MAX_PHOTOS", 999999)
+		u.FeaturedListingsLimit = config.GetIntEnvOrDefault("BUSINESS_FEATURED_LISTINGS", 10)
 	}
 }

@@ -41,51 +41,45 @@ func GetSubscriptionPlans() map[string]PlanConfig {
 		"basic": {
 			ID:               "basic",
 			Name:             "Basic Plan",
-			PriceID:          getEnvOrDefault("STRIPE_PRICE_BASIC", "price_1RhoN2B374sFE2QKRcrkRb6n"),
-			Price:            getFloatEnvOrDefault("BASIC_PLAN_PRICE", 9.99),
-			MaxProducts:      getIntEnvOrDefault("BASIC_MAX_PRODUCTS", 5),
-			MaxPhotos:        getIntEnvOrDefault("BASIC_MAX_PHOTOS", 5),
-			FeaturedListings: getIntEnvOrDefault("BASIC_FEATURED_LISTINGS", 0),
+			PriceID:          GetEnvOrDefault("STRIPE_PRICE_BASIC", "price_1RhoN2B374sFE2QKRcrkRb6n"),
+			Price:            GetFloatEnvOrDefault("BASIC_PLAN_PRICE", 9.99),
+			MaxProducts:      GetIntEnvOrDefault("BASIC_MAX_PRODUCTS", 5),
+			MaxPhotos:        GetIntEnvOrDefault("BASIC_MAX_PHOTOS", 5),
+			FeaturedListings: GetIntEnvOrDefault("BASIC_FEATURED_LISTINGS", 0),
 			Features: []string{
-				"5 Ενεργά προϊόντα",
-				"5 Φωτογραφίες/προϊόν",
+				"3 Ενεργά προϊόντα",
+				"3 Φωτογραφίες/προϊόν",
 				"Βασικό συμβόλαιο ενοικίασης",
-				"Βασικά analytics",
 			},
 		},
 		"professional": {
 			ID:               "professional",
 			Name:             "Professional Plan",
-			PriceID:          getEnvOrDefault("STRIPE_PRICE_PROFESSIONAL", "price_1RhoRzB374sFE2QKicJZICyQ"),
-			Price:            getFloatEnvOrDefault("PROFESSIONAL_PLAN_PRICE", 19.99),
-			MaxProducts:      getIntEnvOrDefault("PROFESSIONAL_MAX_PRODUCTS", 15),
-			MaxPhotos:        getIntEnvOrDefault("PROFESSIONAL_MAX_PHOTOS", 10),
-			FeaturedListings: getIntEnvOrDefault("PROFESSIONAL_FEATURED_LISTINGS", 2),
+			PriceID:          GetEnvOrDefault("STRIPE_PRICE_PROFESSIONAL", "price_1RhoRzB374sFE2QKicJZICyQ"),
+			Price:            GetFloatEnvOrDefault("PROFESSIONAL_PLAN_PRICE", 19.99),
+			MaxProducts:      GetIntEnvOrDefault("PROFESSIONAL_MAX_PRODUCTS", 10),
+			MaxPhotos:        GetIntEnvOrDefault("PROFESSIONAL_MAX_PHOTOS", 10),
+			FeaturedListings: GetIntEnvOrDefault("PROFESSIONAL_FEATURED_LISTINGS", 2),
 			Features: []string{
-				"15 Ενεργά προϊόντα",
+				"10 Ενεργά προϊόντα",
 				"10 Φωτογραφίες/προϊόν",
 				"Προσαρμόσιμο συμβόλαιο",
-				"Προηγμένα analytics",
 				"2 Featured listings/μήνα",
-				"Bulk upload",
 			},
 		},
 		"business": {
 			ID:               "business",
 			Name:             "Business Plan",
-			PriceID:          getEnvOrDefault("STRIPE_PRICE_BUSINESS", "price_1RhoUQB374sFE2QK5Po5AuND"),
-			Price:            getFloatEnvOrDefault("BUSINESS_PLAN_PRICE", 39.99),
-			MaxProducts:      getIntEnvOrDefault("BUSINESS_MAX_PRODUCTS", 999999),
-			MaxPhotos:        getIntEnvOrDefault("BUSINESS_MAX_PHOTOS", 999999),
-			FeaturedListings: getIntEnvOrDefault("BUSINESS_FEATURED_LISTINGS", 10),
+			PriceID:          GetEnvOrDefault("STRIPE_PRICE_BUSINESS", "price_1RhoUQB374sFE2QK5Po5AuND"),
+			Price:            GetFloatEnvOrDefault("BUSINESS_PLAN_PRICE", 39.99),
+			MaxProducts:      GetIntEnvOrDefault("BUSINESS_MAX_PRODUCTS", 999999),
+			MaxPhotos:        GetIntEnvOrDefault("BUSINESS_MAX_PHOTOS", 999999),
+			FeaturedListings: GetIntEnvOrDefault("BUSINESS_FEATURED_LISTINGS", 10),
 			Features: []string{
 				"Απεριόριστα προϊόντα",
 				"Απεριόριστες φωτογραφίες",
 				"Πλήρως custom συμβόλαιο",
-				"Πλήρη analytics + export",
 				"10 Featured listings/μήνα",
-				"Bulk upload",
-				"Custom contact page",
 			},
 		},
 	}
@@ -116,14 +110,14 @@ func ValidatePlanExists(planID string) bool {
 }
 
 // Helper functions for environment variables with defaults
-func getEnvOrDefault(key, defaultValue string) string {
+func GetEnvOrDefault(key, defaultValue string) string {
 	if value := os.Getenv(key); value != "" {
 		return value
 	}
 	return defaultValue
 }
 
-func getIntEnvOrDefault(key string, defaultValue int) int {
+func GetIntEnvOrDefault(key string, defaultValue int) int {
 	if value := os.Getenv(key); value != "" {
 		if intValue, err := strconv.Atoi(value); err == nil {
 			return intValue
@@ -132,7 +126,7 @@ func getIntEnvOrDefault(key string, defaultValue int) int {
 	return defaultValue
 }
 
-func getFloatEnvOrDefault(key string, defaultValue float64) float64 {
+func GetFloatEnvOrDefault(key string, defaultValue float64) float64 {
 	if value := os.Getenv(key); value != "" {
 		if floatValue, err := strconv.ParseFloat(value, 64); err == nil {
 			return floatValue

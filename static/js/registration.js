@@ -318,46 +318,29 @@ function updateButtons() {
     }
 }
 
-// Update Plan Summary
+// Update Plan Summary - NOW USES DYNAMIC DATA
 function updatePlanSummary() {
-    const planNames = {
-        'basic': 'Basic Plan',
-        'professional': 'Professional Plan',
-        'business': 'Business Plan'
-    };
-    
-    const planPrices = {
-        'basic': '€10/μήνα',
-        'professional': '€20/μήνα',
-        'business': '€40/μήνα'
-    };
-    
-    if (selectedPlan) {
-        document.getElementById('selectedPlanName').textContent = planNames[selectedPlan];
-        document.getElementById('selectedPlanPrice').textContent = planPrices[selectedPlan];
-        document.getElementById('totalPrice').textContent = planPrices[selectedPlan];
+    if (selectedPlan && window.PLANS_DATA && window.PLANS_DATA[selectedPlan]) {
+        const planData = window.PLANS_DATA[selectedPlan];
+        const formattedPrice = `€${planData.price.toFixed(2)}/μήνα`;
+        
+        document.getElementById('selectedPlanName').textContent = planData.name;
+        document.getElementById('selectedPlanPrice').textContent = formattedPrice;
+        document.getElementById('totalPrice').textContent = formattedPrice;
     }
 }
 
-// Update Final Plan Summary for Step 3
+// Update Final Plan Summary for Step 3 - NOW USES DYNAMIC DATA
 function updateFinalPlanSummary() {
-    const planNames = {
-        'basic': 'Basic Plan',
-        'professional': 'Professional Plan',
-        'business': 'Business Plan'
-    };
-    
-    const planPrices = {
-        'basic': '€10/μήνα',
-        'professional': '€20/μήνα',
-        'business': '€40/μήνα'
-    };
-    
-    if (selectedPlan) {
-        document.getElementById('finalPlanName').textContent = planNames[selectedPlan];
-        document.getElementById('finalPlanPrice').textContent = planPrices[selectedPlan];
+    if (selectedPlan && window.PLANS_DATA && window.PLANS_DATA[selectedPlan]) {
+        const planData = window.PLANS_DATA[selectedPlan];
+        const formattedPrice = `€${planData.price.toFixed(2)}/μήνα`;
+        
+        document.getElementById('finalPlanName').textContent = planData.name;
+        document.getElementById('finalPlanPrice').textContent = formattedPrice;
     }
 }
+
 // Handle Form Submit
 async function handleSubmit(e) {
     e.preventDefault();
@@ -508,6 +491,7 @@ document.addEventListener('click', function(e) {
         e.target.classList.add('hidden');
     }
 });
+
 // Initialize Stripe and get clientSecret when Step 3 loads
 async function initializePayment() {
     try {

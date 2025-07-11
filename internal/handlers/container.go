@@ -11,6 +11,7 @@ type HandlerContainer struct {
 	userHandler UserHandler
 	authHandler AuthHandler
 	itemHandler ItemHandler
+	subHandler  SubHandler
 }
 
 func NewHandlerContainer(services services.Services, tmpl *template.Template) Handlers {
@@ -19,6 +20,7 @@ func NewHandlerContainer(services services.Services, tmpl *template.Template) Ha
 		userHandler: NewUserHandler(services, tmpl),
 		authHandler: NewAuthHandler(services, tmpl),
 		itemHandler: NewItemHandler(services, tmpl),
+		subHandler:  NewSubHandler(services, tmpl),
 	}
 }
 
@@ -36,4 +38,8 @@ func (h *HandlerContainer) Auth() AuthHandler {
 
 func (h *HandlerContainer) Item() ItemHandler {
 	return h.itemHandler
+}
+
+func (h *HandlerContainer) Subscribe() SubHandler {
+	return h.subHandler
 }

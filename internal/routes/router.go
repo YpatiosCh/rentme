@@ -35,10 +35,10 @@ func SetupRoutes(services services.Services) http.Handler {
 	mux.HandleFunc("/add-item", middleware.RequireUser(handlers.Item().CreateItemForm))
 
 	// Payment endpoints
-	mux.HandleFunc("/create-subscription", handlers.Auth().CreateSubscription)
+	mux.HandleFunc("/create-subscription", handlers.Subscribe().CreateSubscription)
 	mux.HandleFunc("/complete-registration", handlers.Auth().CompleteRegistration)
-	mux.HandleFunc("/stripe/config", handlers.Auth().GetStripeConfig)
-	mux.HandleFunc("/webhook/stripe", handlers.Auth().StripeWebhook)
+	mux.HandleFunc("/stripe/config", handlers.Subscribe().GetStripeConfig)
+	mux.HandleFunc("/webhook/stripe", handlers.Subscribe().StripeWebhook)
 
 	// User endpoints
 	mux.HandleFunc("/users", handlers.User().GetAllUsers)
