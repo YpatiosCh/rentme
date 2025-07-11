@@ -4,6 +4,8 @@ import (
 	"html/template"
 	"net/http"
 
+	"github.com/YpatiosCh/rentme/internal/middleware"
+	"github.com/YpatiosCh/rentme/internal/models"
 	"github.com/YpatiosCh/rentme/internal/services"
 )
 
@@ -30,7 +32,15 @@ func (h *homeHandler) Home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if err := h.tmpl.ExecuteTemplate(w, "home.html", nil); err != nil {
+	user, _ := middleware.GetUserFromContext(r)
+
+	data := struct {
+		User *models.User
+	}{
+		User: user,
+	}
+
+	if err := h.tmpl.ExecuteTemplate(w, "home.html", data); err != nil {
 		http.Error(w, "Failed to render template", http.StatusInternalServerError)
 		return
 	}

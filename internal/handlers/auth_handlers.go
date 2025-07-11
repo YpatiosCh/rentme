@@ -3,6 +3,8 @@ package handlers
 import (
 	"encoding/json"
 	"html/template"
+	"io"
+	"log"
 	"net/http"
 	"time"
 
@@ -12,6 +14,7 @@ import (
 	"github.com/stripe/stripe-go/v76"
 	"github.com/stripe/stripe-go/v76/customer"
 	"github.com/stripe/stripe-go/v76/subscription"
+	"github.com/stripe/stripe-go/v76/webhook"
 )
 
 type authHandler struct {
@@ -48,6 +51,29 @@ func (h *authHandler) ShowRegistrationForm(w http.ResponseWriter, r *http.Reques
 		http.Error(w, "Failed to render template", http.StatusInternalServerError)
 		return
 	}
+}
+
+func (h *authHandler) Logout(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	_, err := r.Cookie("auth_token")
+	if err != nil {
+		http.Error(w, "No session to logout", http.StatusUnauthorized)
+	}
+
+	// clear cookie
+	http.SetCookie(w, &http.Cookie{
+		Name:     "auth_token",
+		Value:    "",
+		Path:     "/",
+		MaxAge:   -1,
+		HttpOnly: true,
+	})
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 // CreateSubscription creates a Stripe Subscription for recurring payments
@@ -203,4 +229,139 @@ func stringPtr(s string) *string {
 
 func timePtr(t time.Time) *time.Time {
 	return &t
+}
+
+// StripeWebhook handles Stripe webhook events
+func (h *authHandler) StripeWebhook(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	payload, err := io.ReadAll(r.Body)
+	if err != nil {
+		http.Error(w, "Invalid payload", http.StatusBadRequest)
+		return
+	}
+
+	// Verify webhook signature με ignore API version mismatch
+	event, err := webhook.ConstructEventWithOptions(
+		payload,
+		r.Header.Get("Stripe-Signature"),
+		config.GetWebhookSecret(),
+		webhook.ConstructEventOptions{
+			IgnoreAPIVersionMismatch: true,
+		},
+	)
+	if err != nil {
+		log.Printf("Webhook signature verification failed: %v", err)
+		http.Error(w, "Invalid signature", http.StatusBadRequest)
+		return
+	}
+
+	// Handle the event
+	switch event.Type {
+	case "invoice.payment_succeeded":
+		h.handlePaymentSucceeded(event)
+	case "invoice.payment_failed":
+		h.handlePaymentFailed(event)
+	case "customer.subscription.deleted":
+		h.handleSubscriptionDeleted(event)
+	default:
+		log.Printf("Unhandled event type: %s", event.Type)
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+// handlePaymentSucceeded processes successful payment events
+func (h *authHandler) handlePaymentSucceeded(event stripe.Event) {
+	var invoice stripe.Invoice
+	if err := json.Unmarshal(event.Data.Raw, &invoice); err != nil {
+		log.Printf("Error parsing invoice: %v", err)
+		return
+	}
+
+	log.Printf("Payment succeeded for customer: %s, amount: %d %s",
+		invoice.Customer.ID, invoice.AmountPaid, invoice.Currency)
+
+	// Find user by customer ID
+	user, err := h.services.User().GetUserByCustomerID(invoice.Customer.ID)
+	if err != nil {
+		log.Printf("Error finding user by customer ID %s: %v", invoice.Customer.ID, err)
+		return
+	}
+
+	// Update subscription status to active
+	user.SubscriptionStatus = stringPtr("active")
+	user.PlanStartDate = timePtr(time.Now())
+	// Don't set PlanEndDate - subscription is recurring
+
+	_, updateErr := h.services.User().UpdateUser(user)
+	if updateErr != nil {
+		log.Printf("Error updating user subscription status: %v", updateErr)
+		return
+	}
+
+	log.Printf("Successfully updated user %s subscription status to active", user.Email)
+}
+
+// handlePaymentFailed processes failed payment events
+func (h *authHandler) handlePaymentFailed(event stripe.Event) {
+	var invoice stripe.Invoice
+	if err := json.Unmarshal(event.Data.Raw, &invoice); err != nil {
+		log.Printf("Error parsing invoice: %v", err)
+		return
+	}
+
+	log.Printf("Payment failed for customer: %s, amount: %d %s",
+		invoice.Customer.ID, invoice.AmountDue, invoice.Currency)
+
+	// Find user by customer ID
+	user, err := h.services.User().GetUserByCustomerID(invoice.Customer.ID)
+	if err != nil {
+		log.Printf("Error finding user by customer ID %s: %v", invoice.Customer.ID, err)
+		return
+	}
+
+	// Update subscription status to past_due
+	user.SubscriptionStatus = stringPtr("past_due")
+
+	_, updateErr := h.services.User().UpdateUser(user)
+	if updateErr != nil {
+		log.Printf("Error updating user subscription status: %v", updateErr)
+		return
+	}
+
+	log.Printf("Successfully updated user %s subscription status to past_due", user.Email)
+}
+
+// handleSubscriptionDeleted processes subscription cancellation events
+func (h *authHandler) handleSubscriptionDeleted(event stripe.Event) {
+	var subscription stripe.Subscription
+	if err := json.Unmarshal(event.Data.Raw, &subscription); err != nil {
+		log.Printf("Error parsing subscription: %v", err)
+		return
+	}
+
+	log.Printf("Subscription deleted for customer: %s", subscription.Customer.ID)
+
+	// Find user by customer ID
+	user, err := h.services.User().GetUserByCustomerID(subscription.Customer.ID)
+	if err != nil {
+		log.Printf("Error finding user by customer ID %s: %v", subscription.Customer.ID, err)
+		return
+	}
+
+	// Update subscription status to canceled and set end date
+	user.SubscriptionStatus = stringPtr("canceled")
+	user.PlanEndDate = timePtr(time.Now())
+
+	_, updateErr := h.services.User().UpdateUser(user)
+	if updateErr != nil {
+		log.Printf("Error updating user subscription status: %v", updateErr)
+		return
+	}
+
+	log.Printf("Successfully updated user %s subscription status to canceled", user.Email)
 }

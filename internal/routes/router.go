@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/YpatiosCh/rentme/internal/handlers"
+	"github.com/YpatiosCh/rentme/internal/middleware"
 	"github.com/YpatiosCh/rentme/internal/services"
 )
 
@@ -18,6 +19,9 @@ func SetupRoutes(services services.Services) http.Handler {
 	// Serve HTML templates
 	tmpl := template.Must(template.ParseGlob("templates/*.html"))
 
+	// initialize middleware
+	middleware := middleware.NewMiddleware(services)
+
 	// initialize handlers with services and templates
 	handlers := handlers.NewHandlerContainer(services, tmpl)
 
@@ -25,22 +29,19 @@ func SetupRoutes(services services.Services) http.Handler {
 	mux.HandleFunc("/", handlers.Home().Home)
 
 	// Authentication endpoints
-	mux.HandleFunc("/register", func(w http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case http.MethodGet:
-			handlers.Auth().ShowRegistrationForm(w, r)
-		default:
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		}
-	})
+	mux.HandleFunc("/register", handlers.Auth().ShowRegistrationForm)
+	mux.HandleFunc("/logout", handlers.Auth().Logout)
+
+	mux.HandleFunc("/add-item", middleware.RequireUser(handlers.Item().CreateItemForm))
 
 	// Payment endpoints
 	mux.HandleFunc("/create-subscription", handlers.Auth().CreateSubscription)
 	mux.HandleFunc("/complete-registration", handlers.Auth().CompleteRegistration)
 	mux.HandleFunc("/stripe/config", handlers.Auth().GetStripeConfig)
+	mux.HandleFunc("/webhook/stripe", handlers.Auth().StripeWebhook)
 
 	// User endpoints
 	mux.HandleFunc("/users", handlers.User().GetAllUsers)
 
-	return mux
+	return middleware.AuthMiddleware(mux)
 }

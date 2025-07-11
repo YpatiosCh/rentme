@@ -58,3 +58,14 @@ func (u *userRepository) GetAllUsers() (*[]models.User, error) {
 	}
 	return &users, nil
 }
+func (u *userRepository) GetUserByCustomerID(customerID string) (*models.User, error) {
+	var user models.User
+	err := u.db.Where("customer_id = ?", customerID).Take(&user).Error
+	if err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return nil, nil
+		}
+		return nil, err
+	}
+	return &user, nil
+}

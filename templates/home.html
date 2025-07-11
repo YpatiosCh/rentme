@@ -17,8 +17,21 @@
                 <div class="logo">
                     <h1>RentMe</h1>
                 </div>
+                 <div>
+                {{if .User}}
+                    <h1>Hello {{.User.Email}}</h1>
+                {{else}}
+                    <h1>Welcome Guest!</h1>
+                {{end}}
+            </div>
                 <div class="nav-actions">
-                    <a href="/register" class="btn btn-primary">Καταχώρησε προϊόν</a>
+                    <a href="/add-item" class="btn btn-primary">Καταχώρησε προϊόν</a>
+
+                    {{if .User}}
+                        <form action="/logout" method="POST" style="display:inline;">
+                            <button type="submit" class="btn btn-secondary">Logout</button>
+                        </form>
+                    {{end}}
                 </div>
             </nav>
         </div>
@@ -169,7 +182,7 @@
                         <div class="benefit">✓ Άμεση επικοινωνία</div>
                     </div>
                     
-                    <a href="/register" class="btn btn-primary">Ξεκίνα τώρα</a>
+                    <a href="/add-item" class="btn btn-primary">Ξεκίνα τώρα</a>
                 </div>
                 <div class="content-visual">
                     <div class="earnings-card">
@@ -205,7 +218,7 @@
                 
                 <div class="cta-actions">
                     <button class="btn btn-primary" onclick="focusSearch()">Αναζήτηση προϊόντων</button>
-                    <a href="/register" class="btn btn-outline">Καταχώρηση προϊόντος</a>
+                    <a href="/add-item" class="btn btn-outline">Καταχώρηση προϊόντος</a>
                 </div>
             </div>
         </div>
@@ -223,7 +236,7 @@
                     <div class="footer-section">
                         <h4>Πλατφόρμα</h4>
                         <a href="#search">Αναζήτηση</a>
-                        <a href="/register">Καταχώρηση</a>
+                        <a href="/add-item">Καταχώρηση</a>
                     </div>
                     <div class="footer-section">
                         <h4>Υποστήριξη</h4>
@@ -240,7 +253,7 @@
 
     <!-- Mobile CTA -->
     <div class="mobile-cta">
-        <a href="/register" class="btn btn-primary">+ Καταχώρησε προϊόν</a>
+        <a href="/add-item" class="btn btn-primary">+ Καταχώρησε προϊόν</a>
     </div>
 
     <script>

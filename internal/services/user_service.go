@@ -106,3 +106,21 @@ func (s *userService) GetAllUsers() (*[]models.User, *err.Error) {
 	}
 	return users, nil
 }
+
+func (s *userService) GetUserByCustomerID(customerID string) (*models.User, *err.Error) {
+	var error err.Error
+	user, err := s.userRepo.GetUserByCustomerID(customerID)
+	if err != nil {
+		error.Code = 500
+		error.Message = err.Error()
+		error.Err = err
+		return nil, &error
+	}
+	if user == nil {
+		error.Code = 404
+		error.Message = "user not found"
+		error.Err = nil
+		return nil, &error
+	}
+	return user, nil
+}

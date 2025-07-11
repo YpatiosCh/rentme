@@ -12,4 +12,5 @@ type UserRepository interface {
 	GetUserByEmail(email string) (*models.User, error)
 	GetUserByID(userID string) (*models.User, error)
 	GetAllUsers() (*[]models.User, error)
+	GetUserByCustomerID(customerID string) (*models.User, error)
 }
