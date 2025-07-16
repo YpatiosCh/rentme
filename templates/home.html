@@ -17,14 +17,10 @@
                 <div class="logo">
                     <h1>RentMe</h1>
                 </div>
-                 <div>
-                {{if .User}}
-                    <h1>Hello {{.User.Email}}</h1>
-                {{else}}
-                    <h1>Welcome Guest!</h1>
-                {{end}}
-            </div>
                 <div class="nav-actions">
+                    {{if not .User}}
+                    <a href="/login" class="btn btn-primary">Σύνδεση/Εγγραφή</a>
+                    {{end}}
                     <a href="/add-item" class="btn btn-primary">Καταχώρησε προϊόν</a>
 
                     {{if .User}}
@@ -183,27 +179,6 @@
                     </div>
                     
                     <a href="/add-item" class="btn btn-primary">Ξεκίνα τώρα</a>
-                </div>
-                <div class="content-visual">
-                    <div class="earnings-card">
-                        <h4>Παράδειγμα εσόδων/μήνα:</h4>
-                        <div class="earning-item">
-                            <span>Φωτογραφική μηχανή</span>
-                            <span>€180</span>
-                        </div>
-                        <div class="earning-item">
-                            <span>Δράπανο</span>
-                            <span>€95</span>
-                        </div>
-                        <div class="earning-item">
-                            <span>Ποδήλατο</span>
-                            <span>€140</span>
-                        </div>
-                        <div class="total-earning">
-                            <span>Σύνολο</span>
-                            <span>€415</span>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>

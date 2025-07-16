@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Σύνδεση - RentMe</title>
+    <link rel="stylesheet" href="/static/css/login.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <div class="login-card">
+            <!-- Header -->
+            <div class="header">
+                <div class="logo">
+                    <h1>RentMe</h1>
+                </div>
+                <h2>Σύνδεση στον λογαριασμό σου</h2>
+                <p>Καλώς ήρθες πάλι! Συνδέσου για να συνεχίσεις.</p>
+            </div>
+
+            <!-- Login Form -->
+            <form method="POST" action="/login" id="loginForm" class="login-form" novalidate>
+                <div class="form-fields">
+                    <div class="field-group">
+                        <label for="email">Email</label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            autocomplete="email"
+                            required
+                        />
+                        <div class="error-message" id="emailError"></div>
+                    </div>
+                    
+                    <div class="field-group">
+                        <label for="password">Κωδικός</label>
+                        <div class="password-field">
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                autocomplete="current-password"
+                                required
+                            />
+                            <button
+                                type="button"
+                                class="password-toggle"
+                                onclick="togglePassword('password')"
+                            >
+                                👁️
+                            </button>
+                        </div>
+                        <div class="error-message" id="passwordError"></div>
+                    </div>
+                </div>
+
+                <!-- Additional Options -->
+                <div class="form-options">
+                    <div class="remember-me">
+                        <input type="checkbox" id="rememberMe" name="remember_me">
+                        <label for="rememberMe">Να με θυμάσαι</label>
+                    </div>
+                    <a href="/forgot-password" class="forgot-password">Ξέχασες τον κωδικό;</a>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="submitBtn" class="btn btn-primary">
+                    Σύνδεση
+                </button>
+            </form>
+
+            <!-- Registration Link -->
+            <div class="register-link">
+                <p>Δεν έχεις λογαριασμό; <a href="/register">Κάνε εγγραφή εδώ</a></p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ΜΟΝΟ CLIENT-SIDE VALIDATION - ΤΙΠΟΤΑ ΑΛΛΟ!
+        
+        // Form validation on submit
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            let isValid = true;
+            
+            // Clear previous errors
+            clearAllErrors();
+            
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value;
+            
+            // Email validation
+            if (!email) {
+                showFieldError('email', 'Το email είναι υποχρεωτικό');
+                isValid = false;
+            } else if (!isValidEmail(email)) {
+                showFieldError('email', 'Παρακαλώ εισάγετε έγκυρο email');
+                isValid = false;
+            }
+            
+            // Password validation
+            if (!password) {
+                showFieldError('password', 'Ο κωδικός είναι υποχρεωτικός');
+                isValid = false;
+            }
+            
+            // Prevent form submission if validation fails
+            if (!isValid) {
+                e.preventDefault();
+                return false;
+            }
+            
+            // If validation passes, form submits normally
+            // Show loading state
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.textContent = 'Σύνδεση...';
+            submitBtn.disabled = true;
+        });
+
+        // Real-time validation on input
+        document.getElementById('email').addEventListener('input', function() {
+            clearFieldError('email');
+            
+            const email = this.value.trim();
+            if (email && !isValidEmail(email)) {
+                showFieldError('email', 'Παρακαλώ εισάγετε έγκυρο email');
+            }
+        });
+
+        document.getElementById('password').addEventListener('input', function() {
+            clearFieldError('password');
+        });
+
+        // Helper functions
+        function clearAllErrors() {
+            document.querySelectorAll('.error-message').forEach(el => {
+                el.textContent = '';
+            });
+            document.querySelectorAll('.field-group input').forEach(el => {
+                el.classList.remove('error');
+            });
+        }
+
+        function showFieldError(fieldName, message) {
+            const errorElement = document.getElementById(fieldName + 'Error');
+            const field = document.getElementById(fieldName);
+            
+            if (errorElement) {
+                errorElement.textContent = message;
+            }
+            if (field) {
+                field.classList.add('error');
+            }
+        }
+
+        function clearFieldError(fieldName) {
+            const errorElement = document.getElementById(fieldName + 'Error');
+            const field = document.getElementById(fieldName);
+            
+            if (errorElement) {
+                errorElement.textContent = '';
+            }
+            if (field) {
+                field.classList.remove('error');
+            }
+        }
+
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+
+        function togglePassword(fieldId) {
+            const field = document.getElementById(fieldId);
+            const button = field.nextElementSibling;
+            
+            if (field.type === 'password') {
+                field.type = 'text';
+                button.textContent = '🙈';
+            } else {
+                field.type = 'password';
+                button.textContent = '👁️';
+            }
+        }
+    </script>
+</body>
+</html>

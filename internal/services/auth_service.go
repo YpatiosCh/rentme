@@ -76,13 +76,13 @@ func (s *authService) LoginUser(email, plainPassword string) (*models.User, stri
 	}
 	if user == nil {
 		e.Code = 400
-		e.Message = "invalid credentials"
+		e.Message = "invalid credentials, no user"
 		return nil, "", &e
 	}
 
-	if passErr := hash.Check(plainPassword, user.PasswordHash); passErr != nil {
+	if passErr := hash.Check(user.PasswordHash, plainPassword); passErr != nil {
 		e.Code = 400
-		e.Message = "invalid credentials"
+		e.Message = "invalid credentials, fuck you"
 		return nil, "", &e
 	}
 

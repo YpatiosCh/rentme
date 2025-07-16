@@ -24,4 +24,5 @@ type AuthService interface {
 	RegisterUser(user *models.User, plainPassword string) (*models.User, *err.Error)
 	GenerateToken(userID uuid.UUID) (string, *err.Error)
 	ValidateToken(tokenString string) (*uuid.UUID, *err.Error)
+	LoginUser(email, plainPassword string) (*models.User, string, *err.Error)
 }

@@ -366,17 +366,13 @@ section h2 {
 }
 
 /* For Owners */
-.split-content {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 60px;
-  align-items: center;
-  max-width: 1000px;
-  margin: 0 auto;
+
+.content-text {
+  text-align: center; /* 🔥 ΠΡΟΣΘΗΚΗ */
 }
 
 .content-text h2 {
-  text-align: left;
+  text-align: center; /* 🔥 ΑΛΛΑΓΗ ΑΠΟ left */
   margin-bottom: 20px;
 }
 
@@ -387,55 +383,16 @@ section h2 {
 }
 
 .benefits-list {
+  text-align: center;
   margin-bottom: 32px;
 }
 
 .benefit {
+  text-align: center;
   color: #48bb78;
   font-weight: 500;
   font-size: 15px;
   margin-bottom: 8px;
-}
-
-.earnings-card {
-  background: white;
-  border-radius: 16px;
-  padding: 32px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-  border: 1px solid #f1f3f4;
-}
-
-.earnings-card h4 {
-  font-size: 16px;
-  font-weight: 600;
-  color: #1a202c;
-  margin-bottom: 20px;
-  text-align: center;
-}
-
-.earning-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid #f1f3f4;
-  font-size: 14px;
-}
-
-.earning-item:last-of-type {
-  border-bottom: none;
-}
-
-.total-earning {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px 0 0;
-  margin-top: 16px;
-  border-top: 2px solid #667eea;
-  font-weight: 600;
-  font-size: 16px;
-  color: #667eea;
 }
 
 /* CTA */

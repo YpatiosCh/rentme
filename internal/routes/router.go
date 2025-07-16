@@ -30,6 +30,7 @@ func SetupRoutes(services services.Services) http.Handler {
 
 	// Authentication endpoints
 	mux.HandleFunc("/register", handlers.Auth().ShowRegistrationForm)
+	mux.HandleFunc("/login", handlers.Auth().Login)
 	mux.HandleFunc("/logout", handlers.Auth().Logout)
 
 	mux.HandleFunc("/add-item", middleware.RequireUser(handlers.Item().CreateItemForm))

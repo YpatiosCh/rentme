@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/YpatiosCh/rentme/internal/config"
+	"github.com/YpatiosCh/rentme/internal/middleware"
 	"github.com/YpatiosCh/rentme/internal/models"
 	"github.com/YpatiosCh/rentme/internal/services"
 )
@@ -44,6 +45,51 @@ func (h *authHandler) ShowRegistrationForm(w http.ResponseWriter, r *http.Reques
 	if err := h.tmpl.ExecuteTemplate(w, "registration.html", data); err != nil {
 		http.Error(w, "Failed to render template", http.StatusInternalServerError)
 		return
+	}
+}
+
+func (h *authHandler) Login(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodGet {
+
+		user, _ := middleware.GetUserFromContext(r)
+		if user != nil {
+			http.Redirect(w, r, "/", http.StatusSeeOther)
+			return
+		}
+
+		if err := h.tmpl.ExecuteTemplate(w, "login.html", nil); err != nil {
+			http.Error(w, "Failed to render template", http.StatusInternalServerError)
+			return
+		}
+	}
+
+	if r.Method == http.MethodPost {
+		if err := r.ParseForm(); err != nil {
+			http.Error(w, "failed to parse form", http.StatusInternalServerError)
+			return
+		}
+
+		email := r.FormValue("email")
+		plainPassword := r.FormValue("password")
+
+		_, token, err := h.services.Auth().LoginUser(email, plainPassword)
+		if err != nil {
+			http.Error(w, err.Message, err.Code)
+			return
+		}
+
+		// Set JWT cookie
+		http.SetCookie(w, &http.Cookie{
+			Name:     "auth_token",
+			Value:    token,
+			HttpOnly: true,
+			Secure:   false, // true σε production
+			SameSite: http.SameSiteStrictMode,
+			Path:     "/",
+			MaxAge:   7 * 24 * 3600, // 7 days
+		})
+
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
 }
 
